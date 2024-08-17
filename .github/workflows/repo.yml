@@ -1,0 +1,49 @@
+name: Zip Repository
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ['main']
+jobs:
+
+ push_to_octopus: 
+   runs-on: ubuntu-latest
+   name: Push Package to Octopus Deploy
+   permissions: 
+     id-token: write  
+   steps:
+    - name: create-version-number
+      id: create-version-number
+      run: echo "version=$(date +'%Y.%m.%d').${{ github.run_number }}" >> "$GITHUB_OUTPUT"
+
+    - name: Login to Octopus Deploy
+      uses: OctopusDeploy/login@v1.0.1
+      with:
+       server: "https://adamclose.octopus.app/"
+       service_account_id: "7bca9f0c-70a6-4e95-a9ff-6aae2d170d43"
+    
+    - name: Create Octopus release
+      uses: OctopusDeploy/create-release-action@v3
+      with:
+        space: Platform Team
+        project: Testing
+
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Create ZIP file
+      run: zip -r octopus.demo.template.${{ steps.create-version-number.outputs.version }}.zip .
+
+    - name: Push to Octopus
+      uses: OctopusDeploy/push-package-action@v3
+      with: 
+        space: Platform Team
+        packages: octopus.demo.template.${{ steps.create-version-number.outputs.version }}.zip
+
+    - name: Push Build Information to Octopus
+      uses: OctopusDeploy/push-build-information-action@v3
+      with:
+        space: Platform Team
+        packages: octopus.demo.template
+        version: ${{ steps.create-version-number.outputs.version }}
+       
