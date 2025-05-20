@@ -1,6 +1,7 @@
 name: Feature Branch
 
-
+on:
+  workflow_dispatch:
 
 env:
   OCTOPUS_URL: ${{ secrets.OCTOPUS_URL }}
