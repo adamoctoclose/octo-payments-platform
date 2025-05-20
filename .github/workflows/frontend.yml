@@ -44,5 +44,5 @@ jobs:
         with:
             space: Retail Banking
             packages: | 
-              ${{ env.PACKAGE_VERSION }}/payments-frontend
+              payments-frontend
             version: ${{ env.PACKAGE_VERSION }}
